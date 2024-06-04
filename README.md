@@ -10,11 +10,26 @@ This `docker-compose.yml` shows how to start a **Docker Compose** controlled mul
  - `explorer/Dockerfile`: define the base image that will be used to provide Multichain-Explorer-2 service;
  - `explorer/entrypoint.sh`: it is the entrypoint that will be used to start the explorer image using the provided parameters;
 
-## Multichain node available arguments
+## Multichain node build arguments
 
 To configure the multichain blockchain you can use the following argument at build stage:
 
  - `MULTICHAIN_RELEASE`: default value `2.3.3`, this value rapresents the Multichain release to use to build the image;
+ - `MULTICHAIN_DOWNLOAD_URL` default value `https://www.multichain.com/download/multichain-2.3.3.tar.gz`, this value rapresents the Multichain archive to include in the built image.
+
+To build the `node` image using the Community Edition binaries you can use the following command:
+
+	$ docker build -t multichain-node:2.3.3 .
+
+To build the `node` image using the Enterprise Demo binaries you can use the following command:
+
+	$ docker build \
+		--build-arg MULTICHAIN_RELEASE=2.3.3-enterprise-demo \
+		--build-arg MULTICHAIN_DOWNLOAD_URL=https://www.multichain.com/download/enterprise/multichain-2.3.3-enterprise-demo.tar.gz \
+		-t multichain-node:2.3.3-enterprise-demo .
+
+
+## Multichain node configuration parameters
 
 To configure the multichain blockchain you can use the following environment variables to defining the node behavior:
 
