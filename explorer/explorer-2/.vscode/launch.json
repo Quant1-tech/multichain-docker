@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "name": "PyD: Explorer",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "multichain-explorer-2\\explorer.py",
+            // "program": "${file}",
+            "postDebugTask": "remove-explorer-pid",
+            "args": ["multichain-explorer-2\\example.ini"]
+            // "args": "${command:pickArgs}",
+        }
+    ]
+}

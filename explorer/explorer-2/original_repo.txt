@@ -1,0 +1,3 @@
+git clone --depth 1 -b master https://github.com/MultiChain/multichain-explorer-2.git
+git checkout 69bc0a
+rm -rf .git

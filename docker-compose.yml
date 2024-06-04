@@ -1,0 +1,115 @@
+# This project is based on https://github.com/Kunstmaan/docker-multichain repository.
+#
+# This file is part of Multichain Docker Repository by 5 EMME Informatica
+# Copyright (C) 2024 5 EMME Informatica
+#
+# Multichain Docker Repository by 5 EMME Informatica is free software: you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation, either version 3 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program.  If not, see <http://www.gnu.org/licenses/>.
+---
+name: mc
+services:
+    master:
+        image: ${REGISTRY}multichain-node:${MULTICHAIN_NODE_RELEASE}
+        container_name: master
+        hostname: master
+        environment:
+          CHAIN_NAME: ${CHAIN_NAME:-chain1}
+          TARGET_BLOCK_TIME: ${TARGET_BLOCK_TIME:-30}
+        ports:
+          - "${RPC_PORT:-6478}:${RPC_PORT:-6478}"
+        volumes:
+          - master_data:/home/multichain/.multichain
+    slave_one:
+        scale: ${ENABLE_SLAVE_1:-0}
+        image: ${REGISTRY}multichain-node:${MULTICHAIN_NODE_RELEASE}
+        container_name: slave-1
+        hostname: slave_one
+        environment:
+          CHAIN_NAME: ${CHAIN_NAME:-chain1}
+          SEED_NODE_IP: master
+          SEED_NODE_PORT: ${NETWORK_PORT:-6479}
+        ports:
+          - ${RPC_PORT:-6478}
+        depends_on:
+          - master
+        volumes:
+          - slave_one_data:/home/multichain/.multichain
+    slave_two:
+        scale: ${ENABLE_SLAVE_2:-0}
+        image: ${REGISTRY}multichain-node:${MULTICHAIN_NODE_RELEASE}
+        container_name: slave-2
+        hostname: slave_two
+        environment:
+          CHAIN_NAME: ${CHAIN_NAME:-chain1}
+          SEED_NODE_IP: master
+          SEED_NODE_PORT: ${NETWORK_PORT:-6479}
+        ports:
+          - ${RPC_PORT:-6478}
+        depends_on:
+          - master
+        volumes:
+          - slave_two_data:/home/multichain/.multichain
+    explorer:
+        image: ${REGISTRY}multichain-explorer:2
+        container_name: explorer
+        hostname: explorer
+        ports:
+          - "4445:4444"
+        environment:
+          CHAIN_NAME: ${CHAIN_NAME:-chain1}
+          RPC_PORT: ${RPC_PORT:-6478}
+          SEED_NODE_IP: master
+        depends_on:
+          - master
+    userapi:
+      scale: ${ENABLE_DB:-0}
+      image: ${REGISTRY}rest_api_user:latest
+      container_name: userapi
+      hostname: userapi
+      ports:
+        - "5002:5000"
+      environment:
+        DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+        TOKEN: ${TOKEN}
+        TZ: ${TZ}
+      depends_on:
+        - db
+    db:
+      scale: ${ENABLE_DB:-0}
+      image: postgres:12-alpine
+      container_name: db_postgresql
+      hostname: db
+      environment:
+        POSTGRES_USER: ${POSTGRES_USER}
+        POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+        POSTGRES_DB: ${POSTGRES_DB}
+        TZ: ${TZ}
+      volumes:
+        - psql_data:/var/lib/postgresql/data/
+    adminer:
+      scale: ${ENABLE_DB:-0}
+      image: adminer:latest
+      container_name: adminer
+      hostname: adminer
+      environment:
+        TZ: ${TZ}
+        ADMINER_DEFULT_SERVER: db
+      ports:
+        - "5001:8080"
+      depends_on:
+        - db
+volumes:
+  master_data:
+  slave_one_data:
+  slave_two_data:
+  psql_data:
