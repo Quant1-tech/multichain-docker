@@ -19,7 +19,8 @@
 name: mc
 services:
     master:
-        image: ${REGISTRY}multichain-node:${MULTICHAIN_NODE_RELEASE}
+        #image: ${REGISTRY}multichain-node:${MULTICHAIN_NODE_RELEASE}
+        build: ./node/
         container_name: master
         hostname: master
         environment:
@@ -31,7 +32,8 @@ services:
           - master_data:/home/multichain/.multichain
     slave_one:
         scale: ${ENABLE_SLAVE_1:-0}
-        image: ${REGISTRY}multichain-node:${MULTICHAIN_NODE_RELEASE}
+        #image: ${REGISTRY}multichain-node:${MULTICHAIN_NODE_RELEASE}
+        build: ./node/
         container_name: slave-1
         hostname: slave_one
         environment:
@@ -46,7 +48,8 @@ services:
           - slave_one_data:/home/multichain/.multichain
     slave_two:
         scale: ${ENABLE_SLAVE_2:-0}
-        image: ${REGISTRY}multichain-node:${MULTICHAIN_NODE_RELEASE}
+        #image: ${REGISTRY}multichain-node:${MULTICHAIN_NODE_RELEASE}
+        build: ./node/
         container_name: slave-2
         hostname: slave_two
         environment:
@@ -60,7 +63,8 @@ services:
         volumes:
           - slave_two_data:/home/multichain/.multichain
     explorer:
-        image: ${REGISTRY}multichain-explorer:2
+        #image: ${REGISTRY}multichain-explorer:2
+        build: ./explorer/
         container_name: explorer
         hostname: explorer
         ports:
@@ -73,7 +77,8 @@ services:
           - master
     userapi:
       scale: ${ENABLE_DB:-0}
-      image: ${REGISTRY}rest_api_user:latest
+      build: ./rest_api_user
+      #image: ${REGISTRY}rest_api_user:latest
       container_name: userapi
       hostname: userapi
       ports:
@@ -83,6 +88,8 @@ services:
         TOKEN: ${TOKEN}
         TZ: ${TZ}
       depends_on:
+        - db
+      links:
         - db
     db:
       scale: ${ENABLE_DB:-0}
